@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 const CFG = {
   company: "Vision in Pixels",
   tagline: "Premium LED Screens · Sales · Rental · Installation",
-  phone: "+91 8668230047 || +91 8668230047",
+  phone: "+91 00000 00000",
   email: "hello@visioninpixels.com",
   gstin: "",          // e.g. 27ABCDE1234F1Z5 (blank = hidden)
   pin: "1234",        // change this! (light protection only)
@@ -58,7 +58,20 @@ const CSS = `/* ---- Internal quotation page ---- */
 .q-lact{white-space:nowrap;text-align:right}.q-mini{border:1px solid #d9d3c4;background:#fff;border-radius:999px;padding:6px 12px;font-size:12px;cursor:pointer;margin-left:6px}
 .q-mini:hover{border-color:#c9a24b}.q-mini.ok{border-color:#9bc492;color:#2f6b2a}.q-mini.no{color:#a33}.q-mini.no:hover{border-color:#a33}
 .q-editing{background:#fbf7e8}.q-tbl td b{font-weight:600}
-.q-toast{margin-top:12px;color:#8f6d22;font-weight:600;font-size:13px}`;
+.q-toast{margin-top:12px;color:#8f6d22;font-weight:600;font-size:13px}
+@media(max-width:700px){
+.q-wrap{padding:20px 14px 60px}.q-card{padding:16px}
+.q-card input,.q-card select{font-size:16px}
+.q-stack{min-width:0!important}.q-stack thead{display:none}.q-stack,.q-stack tbody{display:block}
+.q-stack tr{display:grid;grid-template-columns:1fr 1fr;gap:10px 12px;border:1px solid #ece7da;border-radius:12px;padding:14px;margin-bottom:12px;background:#fff}
+.q-stack td{display:block;padding:0!important;width:auto!important;min-width:0}
+.q-stack td[data-label]::before{content:attr(data-label);display:block;font-size:11px;color:#6b675e;font-weight:500;margin-bottom:3px}
+.q-stack td:first-child{grid-column:1/-1}
+.q-stack td.r{text-align:left;background:#f3efe4;border-radius:8px;padding:8px 10px!important;font-weight:600}
+.q-stack td.q-acts,.q-stack td.q-lact{grid-column:1/-1;display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;text-align:left;white-space:normal}
+.q-lact .q-mini{margin:0}
+.q-row .q-btn,.q-row label{flex:1 1 100%}.q-head .q-new{margin-left:0}
+}`;
 
 // ---------------- Excel export ----------------
 
@@ -306,12 +319,12 @@ export default function Quote() {
       </section>
 
       <section className="q-card">
-        <div className="q-tbl"><table><thead><tr><th>Description</th><th>Width (ft)</th><th>Height (ft)</th><th>Qty</th><th>Rate / sq ft</th><th className="r">Sq ft</th><th className="r">Amount</th><th /></tr></thead>
+        <div className="q-tbl"><table className="q-stack"><thead><tr><th>Description</th><th>Width (ft)</th><th>Height (ft)</th><th>Qty</th><th>Rate / sq ft</th><th className="r">Sq ft</th><th className="r">Amount</th><th /></tr></thead>
           <tbody>{d.rows.map((r, i) => (
             <tr key={r.id}>
-              <td><input value={r.desc} onChange={(e) => upd(r.id, "desc", e.target.value)} placeholder="e.g. Indoor P2.5 stage wall" /></td>
-              {(["w", "h", "qty", "rate"] as const).map((k) => <td key={k} className="num"><input type="number" min="0" step="any" inputMode="decimal" value={r[k]} onChange={(e) => upd(r.id, k, e.target.value)} /></td>)}
-              <td className="r">{fmt(calc.per[i].a)}</td><td className="r">{fmt(calc.per[i].m)}</td>
+              <td data-label="Description"><input value={r.desc} onChange={(e) => upd(r.id, "desc", e.target.value)} placeholder="e.g. Indoor P2.5 stage wall" /></td>
+              {(["w", "h", "qty", "rate"] as const).map((k) => <td key={k} className="num" data-label={({ w: "Width (ft)", h: "Height (ft)", qty: "Qty", rate: "Rate / sq ft" })[k]}><input type="number" min="0" step="any" inputMode="decimal" value={r[k]} onChange={(e) => upd(r.id, k, e.target.value)} /></td>)}
+              <td className="r" data-label="Sq ft">{fmt(calc.per[i].a)}</td><td className="r" data-label="Amount">{fmt(calc.per[i].m)}</td>
               <td className="q-acts"><button className="q-x q-dup" title="Duplicate row" onClick={() => dup(i)}>⧉</button><button className="q-x" title="Remove row" onClick={() => del(r.id)}>×</button></td>
             </tr>))}</tbody></table></div>
         <button className="q-btn q-add" onClick={() => set("rows", [...d.rows, blank()])}>+ Add screen</button>
@@ -347,11 +360,11 @@ export default function Quote() {
           <span>Approved value <b>{fmt(saved.filter((q) => q.status === "approved").reduce((x, q) => x + compute(q.data).G, 0))}</b></span></div>
         {saved.filter((q) => tab === "all" || q.status === tab).length === 0
           ? <p className="q-hint">Nothing here yet. Create a quote and press "Save quote". It will show up here as Pending.</p>
-          : <div className="q-tbl"><table><thead><tr><th>Quote no.</th><th>Client</th><th>Date</th><th className="r">Total</th><th>Status</th><th /></tr></thead>
+          : <div className="q-tbl"><table className="q-stack"><thead><tr><th>Quote no.</th><th>Client</th><th>Date</th><th className="r">Total</th><th>Status</th><th /></tr></thead>
             <tbody>{saved.filter((q) => tab === "all" || q.status === tab).map((q) => (
               <tr key={q.id} className={editingId === q.id ? "q-editing" : ""}>
-                <td><b>{q.data.qno}</b></td><td>{q.data.client || "-"}</td><td>{q.data.date}</td><td className="r">{fmt(compute(q.data).G)}</td>
-                <td><span className={"q-pill " + q.status}>{q.status === "approved" ? "Approved ✓" : "Pending"}</span></td>
+                <td data-label="Quote no."><b>{q.data.qno}</b></td><td data-label="Client">{q.data.client || "-"}</td><td data-label="Date">{q.data.date}</td><td className="r" data-label="Total">{fmt(compute(q.data).G)}</td>
+                <td data-label="Status"><span className={"q-pill " + q.status}>{q.status === "approved" ? "Approved ✓" : "Pending"}</span></td>
                 <td className="q-lact">
                   {q.status === "pending"
                     ? <button className="q-mini ok" onClick={() => setStatus(q.id, "approved")}>Mark approved ✓</button>
