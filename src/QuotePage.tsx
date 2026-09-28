@@ -7,7 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 const CFG = {
   company: "Vision in Pixels",
   tagline: "Premium LED Screens · Sales · Rental · Installation",
-  phone: "+91 8668230047" , "+91 8668230047",  // e.g. +91 1234567890
+  phone: "+91 8668230047 || +91 8668230047",
   email: "hello@visioninpixels.com",
   gstin: "",          // e.g. 27ABCDE1234F1Z5 (blank = hidden)
   pin: "1234",        // change this! (light protection only)
